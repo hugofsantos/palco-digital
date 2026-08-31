@@ -1,4 +1,4 @@
-package com.hugosantos.palco_digital.identity;
+package com.hugosantos.palco_digital.identity.models;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -63,4 +63,7 @@ public class User {
   public UUID getId() {return id;}
   public String getName() {return name;}
   public String getEmail() {return email;}
+  public Set<Group> getGroups() {
+    return new HashSet<>(groups);
+  }
 }

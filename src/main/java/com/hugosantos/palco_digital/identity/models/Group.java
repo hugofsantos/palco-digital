@@ -1,4 +1,4 @@
-package com.hugosantos.palco_digital.identity;
+package com.hugosantos.palco_digital.identity.models;
 
 import java.util.UUID;
 

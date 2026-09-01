@@ -1,4 +1,4 @@
-package com.hugosantos.palco_digital;
+package com.hugosantos.palco_digital.identity;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -23,6 +23,7 @@ public class ChannelController {
     this.createChannelUseCase = createChannelUseCase;
   }
 
+  // TODO: Get ownerId from the authenticated user instead of passing it in the request body
   @PostMapping()
   public ResponseEntity<ChannelResponse> create(@RequestBody CreateChannelRequest request) {
     final ChannelResponse entity = createChannelUseCase.create(request);      

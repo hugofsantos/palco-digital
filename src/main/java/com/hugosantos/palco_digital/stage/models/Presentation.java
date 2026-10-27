@@ -54,6 +54,12 @@ public class Presentation {
     this.status = PresentationStatus.SCHEDULED;
   }
 
+  public static Presentation createInstantPresentation(Channel channel, String title) {    
+    final Presentation presentation = new Presentation(channel, title, OffsetDateTime.now());
+    presentation.status = PresentationStatus.LIVE; 
+    return presentation;
+  }
+
   public void goLive() {
     if (this.status != PresentationStatus.SCHEDULED) {
       throw new IllegalStateException("Only scheduled presentations can go live. Current status: " + this.status);
@@ -81,5 +87,7 @@ public class Presentation {
   public String getTitle() {return title;}
   public OffsetDateTime getScheduledTime() {return scheduledTime;}
   public PresentationStatus getStatus() {return status;}
+  public UUID getChannelId() {return channel.getId();}
+  public String getPresentationStatusName() {return status.name();}
   
 }

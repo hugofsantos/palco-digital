@@ -36,10 +36,10 @@ public class SchedulePresentationUseCase {
 
     return new PresentationResponse(
       savedPresentation.getId(),
-      savedPresentation.getChannel().getId(),
+      savedPresentation.getChannelId(),
       savedPresentation.getTitle(),
       savedPresentation.getScheduledTime(),
-      savedPresentation.getStatus().name()
+      savedPresentation.getPresentationStatusName()
     );
   }
 

@@ -43,9 +43,7 @@ public class Presentation {
   protected Presentation() {} // Empty constructor for JPA
 
   public Presentation(Channel channel, String title, OffsetDateTime scheduledTime) {
-    if (channel == null) {throw new IllegalArgumentException("Channel cannot be null");}
-    if (title == null || title.isBlank()) {throw new IllegalArgumentException("Title cannot be null or blank");}
-    if (scheduledTime == null) {throw new IllegalArgumentException("Scheduled time cannot be null");}
+    validateBaseAttributes(channel, title, scheduledTime);
     if (scheduledTime.isBefore(OffsetDateTime.now())) {throw new IllegalArgumentException("Scheduled time cannot be in the past");}
 
     this.channel = channel;
@@ -54,8 +52,12 @@ public class Presentation {
     this.status = PresentationStatus.SCHEDULED;
   }
 
-  public static Presentation createInstantPresentation(Channel channel, String title) {    
-    final Presentation presentation = new Presentation(channel, title, OffsetDateTime.now());
+  public static Presentation createInstantPresentation(Channel channel, String title) {
+    validateBaseAttributes(channel, title, OffsetDateTime.now());    
+    final Presentation presentation = new Presentation();
+    presentation.channel = channel;
+    presentation.title = title;
+    presentation.scheduledTime = OffsetDateTime.now();
     presentation.status = PresentationStatus.LIVE; 
     return presentation;
   }
@@ -89,5 +91,11 @@ public class Presentation {
   public PresentationStatus getStatus() {return status;}
   public UUID getChannelId() {return channel.getId();}
   public String getPresentationStatusName() {return status.name();}
+
+  private static void validateBaseAttributes(Channel channel, String title, OffsetDateTime scheduledTime) {
+    if (channel == null) {throw new IllegalArgumentException("Channel cannot be null");}
+    if (title == null || title.isBlank()) {throw new IllegalArgumentException("Title cannot be null or blank");}
+    if (scheduledTime == null) {throw new IllegalArgumentException("Scheduled time cannot be null");}
+  }
   
 }

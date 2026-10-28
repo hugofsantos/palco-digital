@@ -7,6 +7,8 @@ import com.hugosantos.palco_digital.identity.dtos.CreateUserRequest;
 import com.hugosantos.palco_digital.identity.dtos.UserResponse;
 import com.hugosantos.palco_digital.identity.usecases.RegisterUserUseCase;
 
+import jakarta.validation.Valid;
+
 import java.net.URI;
 
 import org.springframework.http.ResponseEntity;
@@ -24,7 +26,7 @@ public class UserController {
   }
 
   @PostMapping
-  public ResponseEntity<UserResponse> create(@RequestBody CreateUserRequest request) {
+  public ResponseEntity<UserResponse> create(@RequestBody @Valid CreateUserRequest request) {
     final UserResponse response = registerUserUseCase.register(request);  
     
     final URI location = URI.create("/users/" + response.id());

@@ -7,6 +7,8 @@ import com.hugosantos.palco_digital.stage.dtos.ChannelResponse;
 import com.hugosantos.palco_digital.stage.dtos.CreateChannelRequest;
 import com.hugosantos.palco_digital.stage.usecases.CreateChannelUseCase;
 
+import jakarta.validation.Valid;
+
 import java.net.URI;
 
 import org.springframework.http.ResponseEntity;
@@ -25,7 +27,7 @@ public class ChannelController {
 
   // TODO: Get ownerId from the authenticated user instead of passing it in the request body
   @PostMapping()
-  public ResponseEntity<ChannelResponse> create(@RequestBody CreateChannelRequest request) {
+  public ResponseEntity<ChannelResponse> create(@RequestBody @Valid CreateChannelRequest request) {
     final ChannelResponse entity = createChannelUseCase.create(request);      
     return ResponseEntity.created(URI.create("/channels/" + entity.id())).body(entity);
   }

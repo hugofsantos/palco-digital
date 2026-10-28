@@ -1,6 +1,9 @@
 package com.hugosantos.palco_digital.stage.controllers;
 
 import com.hugosantos.palco_digital.stage.usecases.StartPresentationUseCase;
+
+import jakarta.validation.Valid;
+
 import java.net.URI;
 import java.util.UUID;
 
@@ -45,14 +48,14 @@ public class PresentationController {
 
   // TODO: Verify if the user is the owner of the channel before scheduling a presentation
   @PostMapping()
-  public ResponseEntity<PresentationResponse> schedule(@RequestBody SchedulePresentationRequest request) {
+  public ResponseEntity<PresentationResponse> schedule(@RequestBody @Valid SchedulePresentationRequest request) {
     final PresentationResponse response = schedulePresentationUseCase.schedule(request);
     return ResponseEntity.created(URI.create("/presentations/" + response.id())).body(response);
   }
 
   // TODO: Verify if the user is the owner of the channel before starting an instant presentation
   @PostMapping("/instant")
-  public ResponseEntity<PresentationResponse> startInstant(@RequestBody StartInstantPresentationRequest request) {
+  public ResponseEntity<PresentationResponse> startInstant(@RequestBody @Valid StartInstantPresentationRequest request) {
     final PresentationResponse response = startInstantPresentationUseCase.start(request);      
     return ResponseEntity.created(URI.create("/presentations/" + response.id())).body(response);
   }

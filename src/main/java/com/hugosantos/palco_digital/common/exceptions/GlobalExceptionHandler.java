@@ -1,10 +1,13 @@
 package com.hugosantos.palco_digital.common.exceptions;
 
+import java.net.URI;
 import java.time.Instant;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -12,29 +15,48 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-  public record StandardError(Instant timestamp, Integer status, String error, String path){}
 
-  // TODO: Create BusinessException class to handle business exceptions and return a proper response with status code 422
-  // TODO: Create handlers to differentiate 400 and 422 status codes for different types of exceptions
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<StandardError> handleIllegalArgument(IllegalArgumentException e, HttpServletRequest request) {
-    final StandardError error = new StandardError(
-      Instant.now(), 
-      HttpStatus.UNPROCESSABLE_CONTENT.value(),
-      e.getMessage(), 
-      request.getRequestURI()
-    );
-    return ResponseEntity.unprocessableContent().body(error);
+  // Bean Validation exception handler
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ProblemDetail handleValidationErrors(MethodArgumentNotValidException e, HttpServletRequest request) {
+    final String errorMessage = e.getBindingResult().getFieldErrors().stream()
+      .map(error -> error.getField() + ": " + error.getDefaultMessage())
+      .collect(Collectors.joining(", "));
+
+    final ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, errorMessage);
+    problemDetail.setTitle("Validation Failed");
+    problemDetail.setType(URI.create(request.getRequestURI()));
+    problemDetail.setProperty("timestamp", Instant.now());
+    return problemDetail;
   }
 
+  // Business logic exception handlers (ex: email already exists, channel not found, etc.)
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ProblemDetail handleIllegalArgument(IllegalArgumentException e, HttpServletRequest request) {
+    final ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    problemDetail.setTitle("Bad Request");
+    problemDetail.setType(URI.create(request.getRequestURI()));
+    problemDetail.setProperty("timestamp", Instant.now());
+    return problemDetail;
+  }
+
+  // State machine exception handlers (ex: trying to start a presentation that is already started, etc.)
+  @ExceptionHandler(IllegalStateException.class)
+  public ProblemDetail handleIllegalState(IllegalStateException e, HttpServletRequest request) {
+    final ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, e.getMessage());
+    problemDetail.setTitle("Bad Request");
+    problemDetail.setType(URI.create(request.getRequestURI()));
+    problemDetail.setProperty("timestamp", Instant.now());
+    return problemDetail;
+  }
+
+  // Optimistic locking exception handler
   @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
-  public ResponseEntity<StandardError> handleOptimisticLockingFailure(ObjectOptimisticLockingFailureException e, HttpServletRequest request) {
-    final StandardError error = new StandardError(
-      Instant.now(), 
-      HttpStatus.CONFLICT.value(), 
-      "Conflict occurred while trying to update the resource. Please, update and try again.", 
-      request.getRequestURI()
-    );
-    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  public ProblemDetail handleOptimisticLockingFailure(ObjectOptimisticLockingFailureException e, HttpServletRequest request) {
+    final ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "Conflict occurred while trying to update the resource. Please, update and try again.");
+    problemDetail.setTitle("Conflict");
+    problemDetail.setType(URI.create(request.getRequestURI()));
+    problemDetail.setProperty("timestamp", Instant.now());
+    return problemDetail;
   }
 }
